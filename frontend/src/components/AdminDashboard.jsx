@@ -140,6 +140,7 @@ const AdminDashboard = () => {
   };
 
   // Handle send notification
+  // Handle send notification
   const handleSendNotification = async () => {
     if (!notificationMessage) {
       alert("Please enter a notification message");
@@ -147,25 +148,36 @@ const AdminDashboard = () => {
     }
 
     try {
-      let recipients =
+      // Determine the recipient
+      const recipient =
         notificationRecipient === "all"
-          ? students.map((student) => student.email)
-          : [notificationRecipient];
+          ? "all"
+          : students.find((student) => student.email === notificationRecipient)
+              ?.student_id;
 
-      // Mock notification sending
-      await Promise.all(
-        recipients.map((recipient) =>
-          console.log(
-            `Notification sent to ${recipient}: ${notificationMessage}`
-          )
-        )
+      if (!recipient) {
+        alert("Invalid recipient selected");
+        return;
+      }
+
+      // Send notification via API
+      const response = await axios.post(
+        "http://127.0.0.1:8000/send-notification",
+        {
+          message: notificationMessage,
+          student_id: recipient,
+        }
       );
 
-      alert("Notification sent successfully!");
+      // Show success message
+      alert(response.data.message);
+
+      // Reset notification message
       setNotificationMessage("");
+      setNotificationRecipient("all");
     } catch (error) {
       console.error("Failed to send notification", error);
-      alert(" Failed to send notification");
+      alert(error.response?.data?.detail || "Failed to send notification");
     }
   };
 

@@ -313,3 +313,27 @@ async def view_profile(student_id: str):
     if not student_present:
         raise HTTPException(status_code=404, detail="Student not found")
     return {"Student Detail": list_serial_student([student_present])}
+
+
+@pms_route.get("/get-notifications/{student_id}")
+async def get_notifications(student_id: str):
+    """
+    Get notifications for a specific student.
+
+    :param student_id: The ID of the student fetching their notifications.
+    :return: A list of notifications.
+    """
+    # Fetch notifications specific to the student or sent to "all"
+    notifications = notifications_collection.find(
+        {"$or": [{"student_id": student_id}, {"student_id": "all"}]}
+    )
+
+    notifications_list = [
+        {"message": notification["message"], "timestamp": notification["timestamp"]}
+        for notification in notifications
+    ]
+
+    if not notifications_list:
+        return {"message": "No notifications found."}
+
+    return {"notifications": notifications_list}

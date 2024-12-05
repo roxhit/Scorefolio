@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { Settings, Bell, Sun, Moon, LogOut } from "lucide-react";
+import axios from "axios";
 import {
   Avatar,
   Button,
@@ -12,6 +13,12 @@ import {
   CardActions,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import { Edit } from "@mui/icons-material";
 
@@ -20,7 +27,9 @@ function ProtectedPage() {
   const [userFirstName, setUserFirstName] = useState("User");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(100);
-
+  const [notifications, setNotifications] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   useEffect(() => {
     const token = localStorage.getItem("usersdatatoken");
     if (!token) {
@@ -44,6 +53,18 @@ function ProtectedPage() {
     navigate("/student-profile");
   };
 
+  const fetchNotifications = async (userId) => {
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/get-notifications/${userId}`
+      );
+      setNotifications(response.data.notifications);
+      setNotificationCount(response.data.notifications.length);
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
+  };
+
   const handleLogout = () => {
     // Clear all items from localStorage
     localStorage.removeItem("usersdatatoken");
@@ -52,7 +73,13 @@ function ProtectedPage() {
     // Redirect to login page
     navigate("/");
   };
+  const openNotificationModal = () => {
+    setIsNotificationModalOpen(true);
+  };
 
+  const closeNotificationModal = () => {
+    setIsNotificationModalOpen(false);
+  };
   return (
     <div
       className={`flex min-h-screen ${

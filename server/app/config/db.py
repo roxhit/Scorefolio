@@ -7,6 +7,7 @@ client = MongoClient(MONGO_URL)
 database = client.minor_project
 student_collection = database["student_collection"]
 admin_collection = database["admin_collection"]
+notifications_collection = database["notifications"]
 
 
 # Cloudinary API Configuration

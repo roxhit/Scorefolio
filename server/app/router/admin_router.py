@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from app.config.db import *
 from app.models.admin_model import *
 from bson import ObjectId  # Import password utilities
 from passlib.context import CryptContext
 import jwt  # Import for generating tokens
 from datetime import datetime, timedelta
+from typing import Optional
 
 # Initialize the CryptContext with bcrypt hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -207,3 +208,49 @@ async def verify_student(student_id: str):
             return {"message": f"Student with ID {student_id} is already verified."}
     else:
         return {"message": "Student not found"}
+
+
+@adminRouter.post("/send-notification")
+async def send_notification(
+    message: str = Body(..., embed=True),
+    student_id: Optional[str] = Body(None, embed=True),
+):
+    """
+    Send a notification to all students or a specific student.
+
+    :param message: The notification message.
+    :param student_id: (Optional) ID of a specific student. If "all", the notification is sent to all students.
+    """
+    if not message:
+        raise HTTPException(status_code=400, detail="Message is required.")
+
+    if student_id == "all":
+        # Fetch all student IDs
+        students = student_collection.find({}, {"student_id": 1, "_id": 0})
+        student_ids = [student["student_id"] for student in students]
+
+        if not student_ids:
+            raise HTTPException(status_code=404, detail="No students found.")
+
+        # Insert a notification for each student
+        notifications = [
+            {
+                "message": message,
+                "timestamp": datetime.utcnow(),
+                "student_id": student_id,
+            }
+            for student_id in student_ids
+        ]
+        notifications_collection.insert_many(notifications)
+
+        return {"message": "Notification sent to all students."}
+
+    else:
+        # Insert notification for a specific student
+        notification = {
+            "message": message,
+            "timestamp": datetime.utcnow(),
+            "student_id": student_id,
+        }
+        notifications_collection.insert_one(notification)
+        return {"message": f"Notification sent to student with ID {student_id}."}
