@@ -5,6 +5,8 @@ import SignUpForm from "./components/SignUpPage";
 import DashboardPage from "./components/DashboardPage";
 import StudentDetailsForm from "./components/StudentProfile";
 import ViewProfile from "./components/ViewProfile";
+import AdminLogin from "./components/AdminLogin";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/student-profile" element={<StudentDetailsForm />} />
         <Route path="/view-profile" element={<ViewProfile />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   );
