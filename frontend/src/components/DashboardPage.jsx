@@ -30,8 +30,11 @@ function ProtectedPage() {
   const [notifications, setNotifications] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+
   useEffect(() => {
     const token = localStorage.getItem("usersdatatoken");
+    const userId = localStorage.getItem("userId");
+
     if (!token) {
       navigate("/");
       return;
@@ -42,6 +45,11 @@ function ProtectedPage() {
       setUserFirstName(storedName.split(" ")[0]);
     } else {
       setUserFirstName("User");
+    }
+
+    // Fetch notifications if userId exists
+    if (userId) {
+      fetchNotifications(userId);
     }
   }, [navigate]);
 
@@ -73,6 +81,7 @@ function ProtectedPage() {
     // Redirect to login page
     navigate("/");
   };
+
   const openNotificationModal = () => {
     setIsNotificationModalOpen(true);
   };
@@ -80,6 +89,7 @@ function ProtectedPage() {
   const closeNotificationModal = () => {
     setIsNotificationModalOpen(false);
   };
+
   return (
     <div
       className={`flex min-h-screen ${
@@ -142,16 +152,33 @@ function ProtectedPage() {
           </CardActions>
         </Card>
 
-        {/* Additional Content Here */}
+        {/* Notifications Dialog */}
+        <Dialog open={isNotificationModalOpen} onClose={closeNotificationModal}>
+          <DialogTitle>Notifications</DialogTitle>
+          <DialogContent>
+            <List>
+              {notifications.map((notification, index) => (
+                <ListItem key={index}>
+                  <ListItemText
+                    primary={notification.message}
+                    secondary={new Date(
+                      notification.timestamp
+                    ).toLocaleString()}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Top Navigation */}
       <div className="fixed top-0 right-0 p-4 flex items-center gap-4">
         <Settings className="w-5 h-5" />
-        <div className="relative">
+        <div className="relative" onClick={openNotificationModal}>
           <Bell className="w-5 h-5" />
           <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full w-4 h-4 flex items-center justify-center">
-            8
+            {notificationCount}
           </span>
         </div>
         <Tooltip title="Logout">

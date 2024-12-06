@@ -30,8 +30,8 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
-  Tabs, // Re-added Tabs import
-  Tab, // Re-added Tab import
+  Tabs,
+  Tab,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -39,8 +39,10 @@ import {
   Notifications as NotificationIcon,
   Logout as LogoutIcon,
   Visibility as ViewIcon,
+  FileDownload as ExportIcon,
   Edit as EditIcon,
 } from "@mui/icons-material";
+import * as XLSX from "xlsx";
 import axios from "axios";
 
 const AdminDashboard = () => {
@@ -62,6 +64,11 @@ const AdminDashboard = () => {
   const [studentDetails, setStudentDetails] = useState(null);
   const [activeDetailTab, setActiveDetailTab] = useState(0);
 
+  const [filterName, setFilterName] = useState("");
+  const [filterMinCGPA, setFilterMinCGPA] = useState("");
+  const [filterVerificationStatus, setFilterVerificationStatus] =
+    useState("all");
+
   // Fetch students on component mount
   useEffect(() => {
     fetchStudents();
@@ -78,9 +85,9 @@ const AdminDashboard = () => {
       // Ensure we're setting the correct counts
       setStudents(data.all_students);
       setCounts({
-        total_students: data.total_students, // Total number of students
-        verified_students: data.verified_students, // Number of verified students
-        not_verified_students: data.not_verified_students, // Number of unverified students
+        total_students: data.total_students,
+        verified_students: data.verified_students,
+        not_verified_students: data.not_verified_students,
       });
     } catch (error) {
       console.error("Failed to fetch students", error);
@@ -88,44 +95,112 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle view student details
-  const handleViewStudent = async (student) => {
-    setIsLoading(true);
+  const exportVerifiedStudentDetails = async () => {
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:8000/get-student-detail/${student.student_id}`
+      setIsLoading(true);
+
+      // Filter only verified students
+      const verifiedStudentIds = students
+        .filter((student) => student.is_verified)
+        .map((student) => student.student_id);
+
+      // Fetch details for each verified student
+      const verifiedStudentDetails = await Promise.all(
+        verifiedStudentIds.map(async (studentId) => {
+          try {
+            const response = await axios.get(
+              `http://127.0.0.1:8000/get-student-detail/${studentId}`
+            );
+            return response.data;
+          } catch (error) {
+            console.error(
+              `Failed to fetch details for student ${studentId}`,
+              error
+            );
+            return null;
+          }
+        })
       );
 
-      // Check if student details were successfully retrieved
-      if (response.data && response.data.student_id) {
-        setStudentDetails(response.data);
-        setSelectedStudent(student);
-        setIsViewDialogOpen(true);
-      } else {
-        alert("Unable to retrieve student details");
-      }
+      // Remove any null responses
+      const validVerifiedStudents = verifiedStudentDetails.filter(
+        (detail) => detail !== null
+      );
+
+      const exportData = validVerifiedStudents.map((student) => ({
+        "Student ID": student.student_id,
+        Name: student.name,
+        Email: student.email,
+        Phone: student.phone,
+        Branch: student.basic_details?.branch,
+        "Father Name": student.basic_details?.father_name,
+        "Mother Name": student.basic_details?.mother_name,
+        "Date of Birth": student.basic_details?.date_of_birth,
+        "10th School": student.tenth_details?.school_location,
+        "10th Board": student.tenth_details?.board,
+        "10th Percentage": student.tenth_details?.percentage,
+        "10th Passing Year": student.tenth_details?.year_of_passing,
+        "12th School": student.twelfth_details?.school_location,
+        "12th Board": student.twelfth_details?.board,
+        "12th Percentage": student.twelfth_details?.percentage,
+        "12th Passing Year": student.twelfth_details?.year_of_pasing,
+        "Total Semesters": student.semester_details?.length || 0,
+        "Avg CGPA": student.semester_details
+          ? (
+              student.semester_details.reduce(
+                (sum, sem) => sum + parseFloat(sem.cgpa),
+                0
+              ) / student.semester_details.length
+            ).toFixed(2)
+          : "N/A",
+        "Total Backlogs": student.semester_details
+          ? student.semester_details.reduce(
+              (sum, sem) => sum + parseInt(sem.no_backlogs),
+              0
+            )
+          : "N/A",
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Verified Students");
+
+      XLSX.writeFile(workbook, "Verified_Students.xlsx");
     } catch (error) {
-      console.error("Failed to fetch student details", error);
-      alert("Error fetching student details");
+      console.error("Error exporting verified student details", error);
+      alert("Error exporting data");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle edit student
+  const handleViewStudent = async (student) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `http://127.0.0.1:8000/get-student-detail/${student.student_id}`
+      );
+      setStudentDetails(response.data);
+      setIsViewDialogOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch student details", error);
+      alert("Failed to fetch student details");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleEditStudent = (student) => {
     setEditStudentData(student);
     setIsEditDialogOpen(true);
   };
 
-  // Handle save student changes
   const handleSaveChanges = async () => {
     try {
       await axios.put(
         `http://127.0.0.1:8000/verify-student/${editStudentData.student_id}`,
         {
           is_verified: editStudentData.is_verified,
-          // You can add additional fields if needed for verification
           name: editStudentData.name,
           email: editStudentData.email,
         }
@@ -139,8 +214,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle send notification
-  // Handle send notification
   const handleSendNotification = async () => {
     if (!notificationMessage) {
       alert("Please enter a notification message");
@@ -148,7 +221,6 @@ const AdminDashboard = () => {
     }
 
     try {
-      // Determine the recipient
       const recipient =
         notificationRecipient === "all"
           ? "all"
@@ -160,7 +232,6 @@ const AdminDashboard = () => {
         return;
       }
 
-      // Send notification via API
       const response = await axios.post(
         "http://127.0.0.1:8000/send-notification",
         {
@@ -169,10 +240,7 @@ const AdminDashboard = () => {
         }
       );
 
-      // Show success message
       alert(response.data.message);
-
-      // Reset notification message
       setNotificationMessage("");
       setNotificationRecipient("all");
     } catch (error) {
@@ -181,7 +249,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Render dashboard view
   const renderDashboard = () => (
     <Grid container spacing={3}>
       <Grid item xs={12} md={4}>
@@ -211,7 +278,6 @@ const AdminDashboard = () => {
     </Grid>
   );
 
-  // Render student details dialog
   const renderStudentDetailsDialog = () => {
     if (!studentDetails) return null;
 
@@ -417,122 +483,177 @@ const AdminDashboard = () => {
     );
   };
 
-  // Render students view
-  const renderStudents = () => (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Student List
-      </Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Student ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Verification Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {students.map((student) => (
-              <TableRow key={student.student_id}>
-                <TableCell>{student.student_id}</TableCell>
-                <TableCell>{student.name}</TableCell>
-                <TableCell>{student.email}</TableCell>
-                <TableCell>
-                  {student.is_verified ? "Verified" : "Not Verified"}
-                </TableCell>
-                <TableCell align="right">
-                  <Button
-                    startIcon={<ViewIcon />}
-                    color="primary"
-                    onClick={() => handleViewStudent(student)}
-                    sx={{ mr: 1 }}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    startIcon={<EditIcon />}
-                    color="secondary"
-                    onClick={() => handleEditStudent(student)}
-                  >
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+  const renderStudents = () => {
+    const filteredStudents = students.filter((student) => {
+      const nameMatch = student.name
+        .toLowerCase()
+        .includes(filterName.toLowerCase());
+      const cgpaMatch =
+        filterMinCGPA === "" ||
+        (student.semester_details &&
+          parseFloat(
+            student.semester_details[student.semester_details.length - 1].cgpa
+          ) >= parseFloat(filterMinCGPA));
+      const verificationMatch =
+        filterVerificationStatus === "all" ||
+        (filterVerificationStatus === "verified" && student.is_verified) ||
+        (filterVerificationStatus === "not_verified" && !student.is_verified);
+      return nameMatch && cgpaMatch && verificationMatch;
+    });
 
-      {/* Render the student details dialog */}
-      {renderStudentDetailsDialog()}
-
-      {/* Edit Student Dialog */}
-      <Dialog
-        open={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Edit Student</DialogTitle>
-        <DialogContent>
+    return (
+      <Box>
+        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
           <TextField
-            label="Student ID"
-            value={editStudentData.student_id || ""} // Corrected here
-            disabled
-            fullWidth
-            margin="normal"
+            label="Filter by Name"
+            variant="outlined"
+            value={filterName}
+            onChange={(e) => setFilterName(e.target.value)}
+            sx={{ flex: 1 }}
           />
           <TextField
-            label="Name"
-            value={editStudentData.name || ""}
-            onChange={(e) =>
-              setEditStudentData({ ...editStudentData, name: e.target.value })
-            }
-            fullWidth
-            margin="normal"
+            label="Minimum CGPA"
+            type="number"
+            variant="outlined"
+            value={filterMinCGPA}
+            onChange={(e) => setFilterMinCGPA(e.target.value)}
+            sx={{ width: 150 }}
           />
-          <TextField
-            label="Email"
-            value={editStudentData.email || ""}
-            onChange={(e) =>
-              setEditStudentData({ ...editStudentData, email: e.target.value })
-            }
-            fullWidth
-            margin="normal"
-          />
-          <FormControl fullWidth margin="normal">
+          <FormControl variant="outlined" sx={{ width: 200 }}>
             <InputLabel>Verification Status</InputLabel>
             <Select
-              value={editStudentData.is_verified ? "Verified" : "Not Verified"}
+              value={filterVerificationStatus}
+              onChange={(e) => setFilterVerificationStatus(e.target.value)}
+              label="Verification Status"
+            >
+              <MenuItem value="all">All Students</MenuItem>
+              <MenuItem value="verified">Verified</MenuItem>
+              <MenuItem value="not_verified">Not Verified</MenuItem>
+            </Select>
+          </FormControl>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ExportIcon />}
+            onClick={exportVerifiedStudentDetails}
+            disabled={isLoading}
+          >
+            {isLoading ? "Exporting..." : "Export Verified Students"}
+          </Button>
+        </Box>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Student ID</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Verification Status</TableCell>
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredStudents.map((student) => (
+                <TableRow key={student.student_id}>
+                  <TableCell>{student.student_id}</TableCell>
+                  <TableCell>{student.name}</TableCell>
+                  <TableCell>{student.email}</TableCell>
+                  <TableCell>
+                    {student.is_verified ? "Verified" : "Not Verified"}
+                  </TableCell>
+                  <TableCell align="right">
+                    <Button
+                      startIcon={<ViewIcon />}
+                      color="primary"
+                      onClick={() => handleViewStudent(student)}
+                      sx={{ mr: 1 }}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      startIcon={<EditIcon />}
+                      color="secondary"
+                      onClick={() => handleEditStudent(student)}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {renderStudentDetailsDialog()}
+
+        <Dialog
+          open={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>Edit Student</DialogTitle>
+          <DialogContent>
+            <TextField
+              label="Student ID"
+              value={editStudentData.student_id || ""}
+              disabled
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Name"
+              value={editStudentData.name || ""}
+              onChange={(e) =>
+                setEditStudentData({ ...editStudentData, name: e.target.value })
+              }
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Email"
+              value={editStudentData.email || ""}
               onChange={(e) =>
                 setEditStudentData({
                   ...editStudentData,
-                  is_verified: e.target.value === "Verified",
+                  email: e.target.value,
                 })
               }
-            >
-              <MenuItem value="Verified">Verified</MenuItem>
-              <MenuItem value="Not Verified">Not Verified</MenuItem>
-            </Select>
-          </FormControl>
-          {/* Add any additional fields you want to edit here */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsEditDialogOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSaveChanges} color="primary">
-            Save Changes
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
+              fullWidth
+              margin="normal"
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Verification Status</InputLabel>
+              <Select
+                value={
+                  editStudentData.is_verified ? "Verified" : "Not Verified"
+                }
+                onChange={(e) =>
+                  setEditStudentData({
+                    ...editStudentData,
+                    is_verified: e.target.value === "Verified",
+                  })
+                }
+              >
+                <MenuItem value="Verified">Verified</MenuItem>
+                <MenuItem value="Not Verified">Not Verified</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsEditDialogOpen(false)} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveChanges} color="primary">
+              Save Changes
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    );
+  };
 
-  // Render notification section
   const renderNotificationSection = () => (
     <Box sx={{ mt: 4 }}>
       <Typography variant="h6" gutterBottom>
@@ -571,7 +692,6 @@ const AdminDashboard = () => {
     </Box>
   );
 
-  // Main render function
   return (
     <Box sx={{ display: "flex" }}>
       <Drawer
