@@ -1,43 +1,59 @@
-// Sidebar.js
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Home, User, ClipboardList } from "lucide-react";
 
 const Sidebar = ({ isDarkMode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const sidebarItems = [
-    { icon: Home, label: "Home", active: true, route: "/dashboard" },
+    { icon: Home, label: "Home", route: "/dashboard" },
     { icon: ClipboardList, label: "Job Profiles", route: "/view-profile" },
     { icon: User, label: "My Profile", route: "/view-profile" },
   ];
 
   return (
-    <div className="w-64 border-r border-gray-800 p-4">
-      <div className="flex items-center gap-2 mb-8">
-        <div
-          className={`w-8 h-8 ${
-            isDarkMode ? "bg-blue-500" : "bg-blue-400"
-          } rounded`}
-        ></div>
-        <h1 className="text-xl font-semibold">Scorefolio</h1>
-      </div>
+    <aside className="w-64 min-h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-sm">
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-8">
+          <img
+            src="https://cdn2.joinsuperset.com/students/static/media/superset-logo.23e4e1907b29549ceb57509d5f118ba1.svg"
+            alt="Scorefolio Logo"
+            className="w-8 h-8"
+          />
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Scorefolio
+          </h1>
+        </div>
 
-      <nav className="space-y-2">
-        {sidebarItems.map((item, index) => (
-          <div
-            key={index}
-            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-200 ${
-              item.active ? "bg-gray-200" : ""
-            }`}
-            onClick={() => navigate(item.route)}
-          >
-            <item.icon className="w-5 h-5" />
-            <span>{item.label}</span>
-          </div>
-        ))}
-      </nav>
-    </div>
+        <nav className="space-y-1">
+          {sidebarItems.map((item) => {
+            const isActive = location.pathname === item.route;
+            return (
+              <button
+                key={item.label}
+                onClick={() => navigate(item.route)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                  ${
+                    isActive
+                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
+              >
+                <item.icon
+                  className={`w-5 h-5 ${
+                    isActive
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                />
+                <span className="font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    </aside>
   );
 };
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "./Sidebar";
 import { Settings, Bell, Sun, Moon, LogOut } from "lucide-react";
 import axios from "axios";
 import {
@@ -19,8 +18,10 @@ import {
   List,
   ListItem,
   ListItemText,
+  Paper,
 } from "@mui/material";
 import { Edit } from "@mui/icons-material";
+import Sidebar from "./Sidebar";
 
 function ProtectedPage() {
   const navigate = useNavigate();
@@ -92,124 +93,166 @@ function ProtectedPage() {
 
   return (
     <div
-      className={`flex min-h-screen ${
+      className={`min-h-screen flex ${
         isDarkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"
       }`}
     >
       {/* Sidebar */}
-      <Sidebar isDarkMode={isDarkMode} />
+      <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
-        <div className="flex items-center gap-4 mb-8">
-          {/* Profile Avatar */}
-          <Avatar
-            alt={userFirstName}
-            src="/api/placeholder/64/64"
-            sx={{ width: 64, height: 64 }}
-          />
-          <Typography variant="h4" className="font-semibold">
-            Welcome, {userFirstName}!
-          </Typography>
-        </div>
-
-        {/* Profile Completion Card */}
-        <Card
-          className="mb-8"
-          style={{
-            backgroundColor: isDarkMode ? "#424242" : "#fafafa",
-            color: isDarkMode ? "#f1f1f1" : "#333",
+      <div className="flex-1">
+        <Paper
+          elevation={0}
+          square
+          className="fixed top-0 left-0 right-0 z-10"
+          sx={{
+            backgroundColor: isDarkMode ? "#1e1e1e" : "#f4f6f8",
+            py: 2,
+            px: 4,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            boxShadow: "rgba(0, 0, 0, 0.05) 0px 1px 2px",
           }}
         >
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Profile Completion
-            </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={profileCompletion}
-              style={{ height: 10, borderRadius: 5 }}
-            />
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              style={{ marginTop: 8 }}
-            >
-              {profileCompletion}% completed
-            </Typography>
-          </CardContent>
-          <CardActions>
-            <Button
-              startIcon={<Edit />}
-              onClick={handleEditProfile}
-              style={{
-                backgroundColor: "#3f51b5",
-                color: "#ffffff",
-              }}
-            >
-              Edit Profile
-            </Button>
-          </CardActions>
-        </Card>
-
-        {/* Notifications Dialog */}
-        <Dialog open={isNotificationModalOpen} onClose={closeNotificationModal}>
-          <DialogTitle>Notifications</DialogTitle>
-          <DialogContent>
-            <List>
-              {notifications.map((notification, index) => (
-                <ListItem key={index}>
-                  <ListItemText
-                    primary={notification.message}
-                    secondary={new Date(
-                      notification.timestamp
-                    ).toLocaleString()}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Top Navigation */}
-      <div className="fixed top-0 right-0 p-4 flex items-center gap-4">
-        <Settings className="w-5 h-5" />
-        <div className="relative" onClick={openNotificationModal}>
-          <Bell className="w-5 h-5" />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full w-4 h-4 flex items-center justify-center">
-            {notificationCount}
-          </span>
-        </div>
-        <Tooltip title="Logout">
-          <IconButton
-            onClick={handleLogout}
-            style={{
-              color: isDarkMode ? "#ffffff" : "#333333",
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              color: isDarkMode ? "white" : "text.primary",
             }}
           >
-            <LogOut className="w-5 h-5" />
-          </IconButton>
-        </Tooltip>
-      </div>
+            Scorefolio
+          </Typography>
 
-      {/* Light/Dark Mode Toggle */}
-      <div className="fixed bottom-4 left-4">
-        <button
-          onClick={toggleDarkMode}
-          className="flex items-center gap-2 p-2 border rounded-lg shadow-md transition-colors duration-300"
-          style={{
-            backgroundColor: isDarkMode ? "#333" : "#f1f1f1",
-            color: isDarkMode ? "#f1f1f1" : "#333",
-          }}
-        >
-          {isDarkMode ? (
-            <Sun className="w-5 h-5" />
-          ) : (
-            <Moon className="w-5 h-5" />
-          )}
-          <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
-        </button>
+          <div className="flex items-center gap-4">
+            <Tooltip title="Settings">
+              <IconButton>
+                <Settings
+                  className={`w-5 h-5 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                />
+              </IconButton>
+            </Tooltip>
+
+            <div
+              className="relative cursor-pointer"
+              onClick={openNotificationModal}
+            >
+              <Bell
+                className={`w-5 h-5 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              />
+              {notificationCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-xs text-white rounded-full w-5 h-5 flex items-center justify-center">
+                  {notificationCount}
+                </span>
+              )}
+            </div>
+
+            <Tooltip title="Logout">
+              <IconButton onClick={handleLogout}>
+                <LogOut
+                  className={`w-5 h-5 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                />
+              </IconButton>
+            </Tooltip>
+          </div>
+        </Paper>
+
+        <div className="container mx-auto px-4 pt-20 pb-8">
+          <div className="flex items-center gap-6 mb-8">
+            <Avatar
+              alt={userFirstName}
+              src="/api/placeholder/64/64"
+              sx={{
+                width: 80,
+                height: 80,
+                border: isDarkMode ? "3px solid #333" : "3px solid #e0e0e0",
+              }}
+            />
+            <div>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 600,
+                  color: isDarkMode ? "white" : "text.primary",
+                  mb: 1,
+                }}
+              >
+                Welcome, {userFirstName}!
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                Dashboard Overview
+              </Typography>
+            </div>
+          </div>
+
+          {/* Profile Completion Card */}
+          <Card
+            sx={{
+              backgroundColor: isDarkMode ? "#2a2a2a" : "#ffffff",
+              boxShadow: isDarkMode
+                ? "none"
+                : "rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px",
+              borderRadius: 3,
+              p: 3,
+            }}
+          >
+            <CardContent>
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 2,
+                  color: isDarkMode ? "white" : "text.primary",
+                }}
+              >
+                Profile Completion
+              </Typography>
+              <LinearProgress
+                variant="determinate"
+                value={profileCompletion}
+                sx={{
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: isDarkMode ? "#3a3a3a" : "#e0e0e0",
+                  "& .MuiLinearProgress-bar": {
+                    backgroundColor: "#3f51b5",
+                  },
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  mt: 2,
+                  color: isDarkMode ? "text.secondary" : "text.primary",
+                }}
+              >
+                {profileCompletion}% completed
+              </Typography>
+            </CardContent>
+            <CardActions>
+              <Button
+                startIcon={<Edit />}
+                onClick={handleEditProfile}
+                sx={{
+                  backgroundColor: "#3f51b5",
+                  color: "#ffffff",
+                  "&:hover": {
+                    backgroundColor: "#303f9f",
+                  },
+                }}
+              >
+                Edit Profile
+              </Button>
+            </CardActions>
+          </Card>
+        </div>
       </div>
     </div>
   );

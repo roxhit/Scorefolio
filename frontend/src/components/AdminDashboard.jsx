@@ -32,6 +32,8 @@ import {
   CircularProgress,
   Tabs,
   Tab,
+  Avatar,
+  ListItemAvatar,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -697,58 +699,103 @@ const AdminDashboard = () => {
       <Drawer
         variant="permanent"
         sx={{
-          width: 240,
+          width: 280,
           flexShrink: 0,
           "& .MuiDrawer-paper": {
-            width: 240,
+            width: 280,
             boxSizing: "border-box",
+            backgroundColor: "#ffffff",
+            borderRight: "1px solid rgba(0, 0, 0, 0.12)",
           },
         }}
       >
-        <Toolbar>
-          <Typography variant="h5" sx={{ fontWeight: "bold", ml: 2 }}>
-            Scorefolio
-          </Typography>
+        <Toolbar
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            px: 2,
+            py: 3,
+            borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+          }}
+        >
+          <img
+            src="https://cdn2.joinsuperset.com/students/static/media/superset-logo.23e4e1907b29549ceb57509d5f118ba1.svg"
+            alt="Scorefolio Logo"
+            style={{
+              maxHeight: 50,
+              maxWidth: "100%",
+              objectFit: "contain",
+            }}
+          />
         </Toolbar>
         <List>
+          {[
+            {
+              text: "Dashboard",
+              icon: <DashboardIcon />,
+              view: "dashboard",
+            },
+            {
+              text: "Students",
+              icon: <StudentIcon />,
+              view: "students",
+            },
+            {
+              text: "Notifications",
+              icon: <NotificationIcon />,
+              view: "notifications",
+            },
+          ].map((item) => (
+            <ListItem
+              key={item.view}
+              button
+              selected={selectedView === item.view}
+              onClick={() => setSelectedView(item.view)}
+              sx={{
+                "&.Mui-selected": {
+                  backgroundColor: "rgba(0, 123, 255, 0.1)",
+                  borderRight: "4px solid #007bff",
+                },
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                },
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color: selectedView === item.view ? "#007bff" : "inherit",
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                primaryTypographyProps={{
+                  color: selectedView === item.view ? "#007bff" : "inherit",
+                  fontWeight: selectedView === item.view ? "bold" : "normal",
+                }}
+              />
+            </ListItem>
+          ))}
+
           <ListItem
             button
-            selected={selectedView === "dashboard"}
-            onClick={() => setSelectedView("dashboard")}
-          >
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItem>
-          <ListItem
-            button
-            selected={selectedView === "students"}
-            onClick={() => setSelectedView("students")}
-          >
-            <ListItemIcon>
-              <StudentIcon />
-            </ListItemIcon>
-            <ListItemText primary="Students" />
-          </ListItem>
-          <ListItem
-            button
-            selected={selectedView === "notifications"}
-            onClick={() => setSelectedView("notifications")}
-          >
-            <ListItemIcon>
-              <NotificationIcon />
-            </ListItemIcon>
-            <ListItemText primary="Notifications" />
-          </ListItem>
-          <ListItem
-            button
+            sx={{
+              mt: 2,
+              "&:hover": {
+                backgroundColor: "rgba(244, 67, 54, 0.04)",
+              },
+            }}
             onClick={() => alert("Logout functionality to be implemented")}
           >
-            <ListItemIcon>
+            <ListItemIcon sx={{ color: "error.main" }}>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary="Logout" />
+            <ListItemText
+              primary="Logout"
+              primaryTypographyProps={{ color: "error.main" }}
+            />
           </ListItem>
         </List>
       </Drawer>
@@ -762,6 +809,28 @@ const AdminDashboard = () => {
           minHeight: "100vh",
         }}
       >
+        <Paper
+          elevation={1}
+          sx={{
+            p: 3,
+            borderRadius: 2,
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 600,
+              color: "text.primary",
+              mb: 2,
+            }}
+          >
+            {selectedView === "dashboard" && "Dashboard"}
+            {selectedView === "students" && "Student Management"}
+            {selectedView === "notifications" && "Send Notifications"}
+          </Typography>
+        </Paper>
+
         {selectedView === "dashboard" && renderDashboard()}
         {selectedView === "students" && renderStudents()}
         {selectedView === "notifications" && renderNotificationSection()}
