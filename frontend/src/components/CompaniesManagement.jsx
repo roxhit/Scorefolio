@@ -33,6 +33,7 @@ const CompaniesManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     industry: "",
@@ -76,6 +77,11 @@ const CompaniesManagement = () => {
       });
 
       if (response.ok) {
+        const responseData = await response.json();
+        // If logo file is selected, upload logo
+        if (logoFile) {
+          await handleLogoUpload(responseData.companyId, logoFile);
+        }
         fetchCompanies();
         handleCloseDialog();
       }
@@ -173,6 +179,12 @@ const CompaniesManagement = () => {
       roles: formData.roles.filter((role) => role !== roleToRemove),
     });
   };
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+    }
+  };
 
   return (
     <Box className="p-6">
@@ -256,6 +268,27 @@ const CompaniesManagement = () => {
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} className="mt-2">
+            <Grid item xs={12} className="flex items-center gap-4">
+              <input
+                type="file"
+                accept="image/*"
+                id="logo-upload"
+                hidden
+                onChange={handleLogoChange}
+              />
+              <label htmlFor="logo-upload">
+                <Button
+                  component="span"
+                  variant="outlined"
+                  startIcon={<Upload />}
+                >
+                  Upload Logo
+                </Button>
+              </label>
+              {logoFile && (
+                <Typography variant="body2">{logoFile.name}</Typography>
+              )}
+            </Grid>
             <Grid item xs={12}>
               <TextField
                 label="Company Name"

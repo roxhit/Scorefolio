@@ -48,6 +48,7 @@ import {
 import * as XLSX from "xlsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import CompaniesManagement from "./CompaniesManagement";
 const AdminDashboard = () => {
   // State variables
   const navigate = useNavigate();
@@ -751,7 +752,7 @@ const AdminDashboard = () => {
             {
               text: "Company Management",
               icon: <BusinessIcon />,
-              onClick: () => navigate("/company-management"),
+              view: "companies",
             },
           ].map((item) => (
             <ListItem
@@ -836,12 +837,14 @@ const AdminDashboard = () => {
             {selectedView === "dashboard" && "Dashboard"}
             {selectedView === "students" && "Student Management"}
             {selectedView === "notifications" && "Send Notifications"}
+            {selectedView === "companies" && <CompaniesManagement />}
           </Typography>
         </Paper>
 
         {selectedView === "dashboard" && renderDashboard()}
         {selectedView === "students" && renderStudents()}
         {selectedView === "notifications" && renderNotificationSection()}
+        {selectedView === "companies" && <CompaniesManagement />}
       </Container>
     </Box>
   );
