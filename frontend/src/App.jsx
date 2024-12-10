@@ -7,6 +7,8 @@ import StudentDetailsForm from "./components/StudentProfile";
 import ViewProfile from "./components/ViewProfile";
 import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
+import UpcomingCompaniesPage from "./components/UpcomingCompaniespage";
+import CompaniesManagement from "./components/CompaniesManagement";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route path="/view-profile" element={<ViewProfile />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/upcoming-companies" element={<UpcomingCompaniesPage />} />
+        <Route path="/company-management" element={<CompaniesManagement />} />
       </Routes>
     </BrowserRouter>
   );

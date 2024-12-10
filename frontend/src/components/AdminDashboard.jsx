@@ -43,12 +43,14 @@ import {
   Visibility as ViewIcon,
   FileDownload as ExportIcon,
   Edit as EditIcon,
+  Business as BusinessIcon,
 } from "@mui/icons-material";
 import * as XLSX from "xlsx";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 const AdminDashboard = () => {
   // State variables
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [selectedView, setSelectedView] = useState("dashboard");
   const [notificationRecipient, setNotificationRecipient] = useState("all");
@@ -746,12 +748,17 @@ const AdminDashboard = () => {
               icon: <NotificationIcon />,
               view: "notifications",
             },
+            {
+              text: "Company Management",
+              icon: <BusinessIcon />,
+              onClick: () => navigate("/company-management"),
+            },
           ].map((item) => (
             <ListItem
-              key={item.view}
+              key={item.text}
               button
               selected={selectedView === item.view}
-              onClick={() => setSelectedView(item.view)}
+              onClick={item.onClick || (() => setSelectedView(item.view))}
               sx={{
                 "&.Mui-selected": {
                   backgroundColor: "rgba(0, 123, 255, 0.1)",
@@ -800,6 +807,7 @@ const AdminDashboard = () => {
         </List>
       </Drawer>
 
+      {/* Rest of the component remains the same */}
       <Container
         component="main"
         sx={{

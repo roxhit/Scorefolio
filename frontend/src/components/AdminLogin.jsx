@@ -13,12 +13,14 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 const AdminLogin = () => {
   const [adminId, setAdminId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -26,7 +28,7 @@ const AdminLogin = () => {
     setLoading(true);
     setError("");
 
-    // Basic client-side validation
+    // Comprehensive client-side validation
     if (!adminId || !password) {
       setError("Please enter both Admin ID and Password");
       setLoading(false);
@@ -41,7 +43,6 @@ const AdminLogin = () => {
           admin_password: password,
         },
         {
-          // Add timeout and error handling
           timeout: 5000,
           headers: {
             "Content-Type": "application/json",
@@ -49,21 +50,20 @@ const AdminLogin = () => {
         }
       );
 
-      // More secure way of handling tokens
+      // Secure token storage
       localStorage.setItem("adminToken", response.data.access_token);
+
+      // Navigate to admin dashboard
       navigate("/admin-dashboard");
-      // Redirect or navigate to admin dashboard
-      // For React Router: history.push('/dashboard')
-      alert("Login Successful!");
     } catch (err) {
       if (err.response) {
-        // The request was made and the server responded with a status code
+        // Server responded with an error
         setError(err.response.data.detail || "Login failed. Please try again.");
       } else if (err.request) {
-        // The request was made but no response was received
+        // No response received
         setError("No response from server. Please check your connection.");
       } else {
-        // Something happened in setting up the request
+        // Error in request setup
         setError("An error occurred. Please try again.");
       }
     } finally {
@@ -92,6 +92,16 @@ const AdminLogin = () => {
           borderRadius: 2,
         }}
       >
+        <img
+          src="https://cdn2.joinsuperset.com/students/static/media/superset-logo.23e4e1907b29549ceb57509d5f118ba1.svg"
+          alt="Superset Logo"
+          style={{
+            width: 100,
+            marginBottom: 20,
+            objectFit: "contain",
+          }}
+        />
+
         <Typography
           component="h1"
           variant="h5"

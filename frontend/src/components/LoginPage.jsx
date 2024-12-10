@@ -21,7 +21,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const validateForm = () => {
-    if (student_id === "" || password === "") {
+    if (!student_id || !password) {
       setError("Please fill in all fields");
       return false;
     }
@@ -31,12 +31,10 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
-    setError(""); // Clear previous errors
+    setError("");
 
     try {
       const response = await axios.post("http://localhost:8000/student-login", {
@@ -45,94 +43,115 @@ const Login = () => {
       });
 
       if (response.data.token && response.data.student_name) {
+        // Store authentication details securely
         localStorage.setItem("usersdatatoken", response.data.token);
         localStorage.setItem("userName", response.data.student_name);
         localStorage.setItem("userId", response.data.student_id);
+
+        // Navigate to dashboard on successful login
         navigate("/dashboard");
       } else {
-        setError("Token or user name not found in response data");
+        setError("Invalid login response. Please try again.");
       }
     } catch (error) {
-      setError("Login failed. Please check your credentials and try again.");
+      // More specific error handling
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        setError(
+          error.response.data.message ||
+            "Login failed. Please check your credentials."
+        );
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError(
+          "No response from server. Please check your network connection."
+        );
+      } else {
+        // Something happened in setting up the request
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
+    <Container maxWidth="xs">
+      <Paper
+        elevation={3}
         sx={{
           marginTop: 8,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          padding: 4,
         }}
       >
-        <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Login
+        <img
+          src="https://cdn2.joinsuperset.com/students/static/media/superset-logo.23e4e1907b29549ceb57509d5f118ba1.svg"
+          alt="Superset Logo"
+          style={{
+            width: 150,
+            marginBottom: 20,
+          }}
+        />
+
+        <Typography component="h1" variant="h5">
+          Student Login
+        </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ width: "100%", mt: 1 }}
+        >
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Student ID"
+            value={student_id}
+            onChange={(e) => setStudentId(e.target.value)}
+            autoComplete="username"
+            autoFocus
+          />
+
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            disabled={loading}
+            sx={{ mt: 3, mb: 2 }}
+          >
+            {loading ? <CircularProgress size={24} /> : "Login"}
+          </Button>
+
+          <Typography variant="body2" align="center">
+            Don't have an account?{" "}
+            <Link to="/signup" style={{ textDecoration: "none" }}>
+              Sign up
+            </Link>
           </Typography>
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="student_id"
-              label="Student ID"
-              value={student_id}
-              onChange={(e) => setStudentId(e.target.value)}
-              autoComplete="username"
-              autoFocus
-            />
-
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="password"
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2, height: 48 }}
-              disabled={loading}
-            >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Login"
-              )}
-            </Button>
-
-            <Box sx={{ textAlign: "center", mt: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Don't have an account?{" "}
-                <Link
-                  to="/signup"
-                  style={{ color: "primary.main", textDecoration: "none" }}
-                >
-                  Sign up
-                </Link>
-              </Typography>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
+        </Box>
+      </Paper>
     </Container>
   );
 };

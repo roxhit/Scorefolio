@@ -8,7 +8,11 @@ const Sidebar = ({ isDarkMode }) => {
 
   const sidebarItems = [
     { icon: Home, label: "Home", route: "/dashboard" },
-    { icon: ClipboardList, label: "Job Profiles", route: "/view-profile" },
+    {
+      icon: ClipboardList,
+      label: "Job Profiles",
+      route: "/upcoming-companies",
+    },
     { icon: User, label: "My Profile", route: "/view-profile" },
   ];
 
@@ -18,8 +22,12 @@ const Sidebar = ({ isDarkMode }) => {
         <div className="flex items-center gap-3 mb-8">
           <img
             src="https://cdn2.joinsuperset.com/students/static/media/superset-logo.23e4e1907b29549ceb57509d5f118ba1.svg"
-            alt="Scorefolio Logo"
-            className="w-8 h-8"
+            alt="Superset Logo"
+            style={{
+              width: 100, // Reduced from 150 to 100
+              marginBottom: 20,
+              objectFit: "contain", // Ensure logo maintains its aspect ratio
+            }}
           />
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             Scorefolio
