@@ -9,13 +9,15 @@ import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard";
 import UpcomingCompaniesPage from "./components/UpcomingCompaniespage";
 import CompaniesManagement from "./components/CompaniesManagement";
+import ScorefolioHomePage from "./components/HomePage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpForm />} />
+        <Route path="/" element={<ScorefolioHomePage />} />
+        <Route path="/student-login" element={<LoginPage />} />
+        <Route path="/student-signup" element={<SignUpForm />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/student-profile" element={<StudentDetailsForm />} />
         <Route path="/view-profile" element={<ViewProfile />} />
