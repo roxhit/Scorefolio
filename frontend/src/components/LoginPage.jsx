@@ -146,7 +146,7 @@ const Login = () => {
 
           <Typography variant="body2" align="center">
             Don't have an account?{" "}
-            <Link to="/signup" style={{ textDecoration: "none" }}>
+            <Link to="/student-signup" style={{ textDecoration: "none" }}>
               Sign up
             </Link>
           </Typography>

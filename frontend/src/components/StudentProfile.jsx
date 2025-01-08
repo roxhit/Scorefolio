@@ -89,6 +89,33 @@ const StudentDetailsForm = () => {
       ],
     }));
   };
+  // const calculateCompletionPercentage = () => {
+  //   let totalFields = 0;
+  //   let completedFields = 0;
+
+  //   const countFields = (data) => {
+  //     Object.keys(data).forEach((key) => {
+  //       if (Array.isArray(data[key])) {
+  //         data[key].forEach((item) => countFields(item));
+  //       } else if (typeof data[key] === "object" && data[key] !== null) {
+  //         countFields(data[key]);
+  //       } else {
+  //         totalFields++;
+  //         if (data[key] !== "" && data[key] !== null && data[key] !== 0) {
+  //           completedFields++;
+  //         }
+  //       }
+  //     });
+  //   };
+
+  //   countFields(formData);
+
+  //   return Math.round((completedFields / totalFields) * 100);
+  // };
+  // useEffect(() => {
+  //   const percentage = calculateCompletionPercentage();
+  //   setCompletionPercentage(percentage);
+  // }, [formData]);
 
   const validatePercentage = (value) => {
     const floatValue = parseFloat(value);

@@ -29,14 +29,16 @@ import {
 import { Upload, Trash2, Edit, Building2, Plus } from "lucide-react";
 
 const CompaniesManagement = () => {
-  const [companies, setCompanies] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [logoFile, setLogoFile] = useState(null);
+  const [newRole, setNewRole] = useState("");
+
   const [formData, setFormData] = useState({
     name: "",
     industry: "",
+    logo: "",
     recruitmentDate: "",
     ctc: "",
     roles: [],
@@ -47,21 +49,23 @@ const CompaniesManagement = () => {
     },
     additionalInfo: "",
   });
-  const [newRole, setNewRole] = useState("");
+  const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
-    fetchCompanies();
-  }, []);
+    let mounted = true;
 
-  const fetchCompanies = async () => {
-    try {
+    const fetchData = async () => {
+      console.log("Fetching companies...");
       const response = await fetch("http://127.0.0.1:8000/companies/");
       const data = await response.json();
-      setCompanies(data.companies);
-    } catch (error) {
-      console.error("Failed to fetch companies:", error);
-    }
-  };
+      if (mounted) {
+        setCompanies(data.companies);
+      }
+    };
+
+    fetchData();
+    return () => (mounted = false);
+  }, []);
 
   const handleSubmit = async () => {
     try {
@@ -70,19 +74,26 @@ const CompaniesManagement = () => {
         ? `http://127.0.0.1:8000/companies/${selectedCompany._id}`
         : "http://127.0.0.1:8000/add-company";
 
+      // Ensure formData matches CompanyDetails model structure
+      const submissionData = {
+        ...formData,
+        eligibility: {
+          minScore: parseInt(formData.eligibility.minScore),
+          backlogsAllowed: parseInt(formData.eligibility.backlogsAllowed),
+        },
+      };
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionData),
       });
 
       if (response.ok) {
         const responseData = await response.json();
-        // If logo file is selected, upload logo
         if (logoFile) {
-          await handleLogoUpload(responseData.companyId, logoFile);
+          await handleLogoUpload(responseData.company_id, logoFile);
         }
-        fetchCompanies();
         handleCloseDialog();
       }
     } catch (error) {

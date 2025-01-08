@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Card,
@@ -29,6 +30,7 @@ import axios from "axios";
 import Sidebar from "./Sidebar";
 
 function ViewProfile() {
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -56,6 +58,10 @@ function ViewProfile() {
 
     fetchProfileData();
   }, []);
+
+  const handleEditProfile = () => {
+    navigate("/edit-profile");
+  };
 
   if (loading) {
     return (
@@ -165,7 +171,12 @@ function ViewProfile() {
               <Typography color="textSecondary" gutterBottom>
                 {profileData.email}
               </Typography>
-              <Button variant="contained" startIcon={<Edit />} sx={{ mt: 2 }}>
+              <Button
+                variant="contained"
+                startIcon={<Edit />}
+                sx={{ mt: 2 }}
+                onClick={handleEditProfile}
+              >
                 Edit Profile
               </Button>
             </Grid2>

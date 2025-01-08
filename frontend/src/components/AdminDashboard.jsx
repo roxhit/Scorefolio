@@ -844,7 +844,7 @@ const AdminDashboard = () => {
         {selectedView === "dashboard" && renderDashboard()}
         {selectedView === "students" && renderStudents()}
         {selectedView === "notifications" && renderNotificationSection()}
-        {selectedView === "companies" && <CompaniesManagement />}
+        {selectedView === "companies"}
       </Container>
     </Box>
   );

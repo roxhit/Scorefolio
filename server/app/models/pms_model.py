@@ -57,3 +57,41 @@ class StudentDetails(BaseModel):
     tenth_details: TenthDetails
     twelfth_details: TwelfthDetails
     semester_details: List[SemesterDetails]
+
+
+class UpdateBasicDetails(BaseModel):
+    full_name: Optional[str]
+    father_name: Optional[str]
+    mother_name: Optional[str]
+    date_of_birth: Optional[str]
+    branch: Optional[str]
+
+
+class UpdateTenthDetails(BaseModel):
+    school_location: Optional[str]
+    percentage: Optional[float]
+    board: Optional[str]
+    marksheet_url: Optional[str]
+    year_of_passing: Optional[int]
+
+
+class UpdateTwelfthDetails(BaseModel):
+    school_location: Optional[str]
+    percentage: Optional[float]
+    board: Optional[str]
+    marksheet_url: Optional[str]
+    year_of_passing: Optional[int]
+
+
+class UpdateSemesterDetails(BaseModel):
+    semester: Optional[int]
+    cgpa: Optional[float]
+    no_backlogs: Optional[int]
+    marksheet_url: Optional[str]
+
+
+class UpdateProfile(BaseModel):
+    basic_details: Optional[UpdateBasicDetails]
+    tenth_details: Optional[UpdateTenthDetails]
+    twelfth_details: Optional[UpdateTwelfthDetails]
+    semester_details: Optional[List[UpdateSemesterDetails]]

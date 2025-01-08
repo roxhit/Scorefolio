@@ -29,10 +29,12 @@ function ProtectedPage() {
   const [userFirstName, setUserFirstName] = useState("User");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(100);
+  // Initialize notifications as an empty array
   const [notifications, setNotifications] = useState([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("usersdatatoken");
@@ -46,51 +48,50 @@ function ProtectedPage() {
     const storedName = localStorage.getItem("userName");
     if (storedName) {
       setUserFirstName(storedName.split(" ")[0]);
-    } else {
-      setUserFirstName("User");
     }
 
-    // Fetch notifications if userId exists
+    // Only fetch notifications if userId exists
     if (userId) {
       fetchNotifications(userId);
     }
   }, [navigate]);
 
-  const handleEditProfile = () => {
-    navigate("/student-profile");
-  };
-
   const fetchNotifications = async (userId) => {
-    try {
-      const response = await axios.get(
-        `http://127.0.0.1:8000/get-notifications/${userId}`
-      );
-      setNotifications(response.data.notifications);
-      setNotificationCount(response.data.notifications.length);
-    } catch (error) {
-      console.error("Failed to fetch notifications", error);
-    }
-  };
-
-  const openNotificationModal = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      const userId = localStorage.getItem("userId");
       const response = await axios.get(
         `http://127.0.0.1:8000/get-notifications/${userId}`
       );
-      setNotifications(response.data.notifications);
-      setNotificationCount(response.data.notifications.length);
-      setIsNotificationModalOpen(true);
+      // Ensure notifications is always an array
+      const notificationData = response.data.notifications || [];
+      setNotifications(notificationData);
+      setNotificationCount(notificationData.length);
     } catch (error) {
       console.error("Failed to fetch notifications", error);
+      setError("Failed to fetch notifications. Please try again later.");
+      // Set empty array on error to prevent undefined
+      setNotifications([]);
+      setNotificationCount(0);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const openNotificationModal = async () => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      await fetchNotifications(userId);
+    }
+    setIsNotificationModalOpen(true);
+  };
+
   const closeNotificationModal = () => {
     setIsNotificationModalOpen(false);
+  };
+
+  const handleEditProfile = () => {
+    navigate("/student-profile");
   };
 
   const handleLogout = () => {
@@ -106,10 +107,8 @@ function ProtectedPage() {
         isDarkMode ? "bg-gray-900 text-gray-100" : "bg-white text-gray-900"
       }`}
     >
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
       <div className="flex-1 p-8">
         <div className="flex justify-end items-center gap-4 mb-8">
           <Tooltip title="Settings">
@@ -149,7 +148,6 @@ function ProtectedPage() {
           </Tooltip>
         </div>
 
-        {/* Notifications Modal */}
         <Dialog
           open={isNotificationModalOpen}
           onClose={closeNotificationModal}
@@ -164,8 +162,16 @@ function ProtectedPage() {
               <div className="flex justify-center items-center py-4">
                 <CircularProgress />
               </div>
+            ) : error ? (
+              <Typography
+                variant="body2"
+                color="error"
+                className="text-center py-4"
+              >
+                {error}
+              </Typography>
             ) : notifications.length === 0 ? (
-              <Typography variant="body2" className="text-center">
+              <Typography variant="body2" className="text-center py-4">
                 No notifications
               </Typography>
             ) : (
@@ -193,7 +199,6 @@ function ProtectedPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Rest of the existing component remains the same */}
         <div className="flex items-center gap-6 mb-8">
           <Avatar
             alt={userFirstName}
@@ -221,7 +226,6 @@ function ProtectedPage() {
           </div>
         </div>
 
-        {/* Profile Completion Card */}
         <Card
           sx={{
             backgroundColor: isDarkMode ? "#2a2a2a" : "#ffffff",

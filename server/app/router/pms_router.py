@@ -337,3 +337,62 @@ async def get_notifications(student_id: str):
         return {"message": "No notifications found."}
 
     return {"notifications": notifications_list}
+
+
+@pms_route.put("/update-profile", tags=["Student Profile"])
+async def update_profile(student_id: str, profile_updates: UpdateProfile):
+    """
+    Update a student's profile details in MongoDB.
+
+    Args:
+    - student_id (str): Unique identifier of the student.
+    - profile_updates (UpdateProfile): The updated profile details.
+
+    Returns:
+    - JSON response indicating success or failure.
+    """
+    try:
+        # Check if student exists
+        student_present = student_collection.find_one({"student_id": student_id})
+        if not student_present:
+            raise HTTPException(status_code=404, detail="Student not found")
+
+        # Prepare update data
+        update_data = {}
+        if profile_updates.basic_details:
+            update_data["basic_details"] = profile_updates.basic_details.dict(
+                exclude_unset=True
+            )
+        if profile_updates.tenth_details:
+            update_data["tenth_details"] = profile_updates.tenth_details.dict(
+                exclude_unset=True
+            )
+        if profile_updates.twelfth_details:
+            update_data["twelfth_details"] = profile_updates.twelfth_details.dict(
+                exclude_unset=True
+            )
+        if profile_updates.semester_details:
+            update_data["semester_details"] = [
+                sem.dict(exclude_unset=True) for sem in profile_updates.semester_details
+            ]
+
+        # Perform the update
+        update_result = student_collection.update_one(
+            {"student_id": student_id}, {"$set": update_data}
+        )
+
+        if update_result.modified_count == 0:
+            raise HTTPException(
+                status_code=400, detail="No changes were made to the student profile"
+            )
+
+        return {
+            "message": "Student profile updated successfully",
+            "student_id": student_id,
+        }
+
+    except HTTPException as http_err:
+        raise http_err
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
