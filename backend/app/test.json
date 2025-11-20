@@ -1,0 +1,93 @@
+[
+    {
+        "name": "IndiaBIX",
+        "category": "Aptitude",
+        "link": "https://www.indiabix.com",
+        "description": "Offers a vast collection of aptitude questions, puzzles, and interview preparation materials.",
+        "type": "Website"
+    },
+    {
+        "name": "Practice Aptitude Tests",
+        "category": "Aptitude",
+        "link": "https://www.practiceaptitudetests.com",
+        "description": "Provides a wide range of free aptitude tests with solutions and performance tracking.",
+        "type": "Website"
+    },
+    {
+        "name": "Aptitude-Test.com",
+        "category": "Aptitude",
+        "link": "https://aptitude-test.com",
+        "description": "Offers free cognitive ability tests and premium packages for in-depth preparation.",
+        "type": "Website"
+    },
+    {
+        "name": "How to Ace the Aptitude Test in Placements | FREE Resources Included",
+        "category": "Aptitude",
+        "link": "https://www.youtube.com/watch?v=sXsKi9tVuJg",
+        "description": "A detailed guide on preparing for aptitude tests with free resources.",
+        "type": "YouTube"
+    },
+    {
+        "name": "LeetCode",
+        "category": "Coding",
+        "link": "https://leetcode.com",
+        "description": "A platform offering coding problems categorized by difficulty and topic.",
+        "type": "Website"
+    },
+    {
+        "name": "GeeksforGeeks",
+        "category": "Coding",
+        "link": "https://www.geeksforgeeks.org",
+        "description": "Provides tutorials, coding problems, and interview preparation materials.",
+        "type": "Website"
+    },
+    {
+        "name": "HackerRank",
+        "category": "Coding",
+        "link": "https://www.hackerrank.com",
+        "description": "Offers coding challenges and competitions across various domains.",
+        "type": "Website"
+    },
+    {
+        "name": "InterviewBit",
+        "category": "Coding",
+        "link": "https://www.interviewbit.com/practice/",
+        "description": "Provides coding challenges and interview questions for various companies.",
+        "type": "Website"
+    },
+    {
+        "name": "Soft Skills Training for Students from Local Chapters",
+        "category": "Coding",
+        "link": "https://www.youtube.com/watch?v=DZoji_ArFeg",
+        "description": "Focuses on improving communication skills relevant to placements.",
+        "type": "YouTube"
+    },
+    {
+        "name": "Coursera - Communication Skills Courses",
+        "category": "Communication Skills",
+        "link": "https://www.coursera.org/courses?query=communication+skills",
+        "description": "Offers online courses to improve communication skills, including business writing, public speaking, and interpersonal communication.",
+        "type": "Website"
+    },
+    {
+        "name": "Pollack Peacebuilding Systems",
+        "category": "Communication Skills",
+        "link": "https://pollackpeacebuilding.com/effective-communication-skills-training/",
+        "description": "Provides effective communication skills training and workshops for employees, workplace leaders, and companies.",
+        "type": "Website"
+    },
+    {
+        "name": "SkillRobo - Communication Skills Assessment Tools",
+        "category": "Communication Skills",
+        "link": "https://www.skillrobo.com/communication-skills-assessment-tools/",
+        "description": "Offers pre-employment assessment tools to evaluate communication skills effectively.",
+        "type": "Website"
+    },
+    {
+        "name": "Soft Skills Training for Students from Local Chapters",
+        "category": "Communication Skills",
+        "link": "https://www.youtube.com/watch?v=DZoji_ArFeg",
+        "description": "Provides training on soft skills crucial for campus placements.",
+        "type": "YouTube"
+    }
+]
